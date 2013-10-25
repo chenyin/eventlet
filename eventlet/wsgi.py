@@ -377,9 +377,14 @@ class HttpProtocol(BaseHTTPServer.BaseHTTPRequestHandler):
                     # Avoid dangling circular ref
                     exc_info = None
 
-            capitalized_headers = [('-'.join([x.capitalize()
-                                              for x in key.split('-')]), value)
-                                   for key, value in response_headers]
+            capitalized_headers = []
+            # keep the original etag header key capital from upstream
+            for key, value in response_headers:
+                if key.lower() == "etag":
+                    capitalized_headers.append((key, value))
+                else:
+                    capitalized_headers.append(('-'.join([x.capitalize()
+                                              for x in key.split('-')]), value))
 
             headers_set[:] = [status, capitalized_headers]
             return write
